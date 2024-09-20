@@ -27,4 +27,59 @@ app.get('/categories', async function (req: Request, res: Response) {
     });
 });
 
-app.listen('3000', () => console.log("Server is listening on port 3000"));
+app.get("/categories/form", async function (req: Request, res: Response) {
+    return res.render("categories/form");
+});
+
+app.post("/categories/save", async function(req: Request, res: Response) {
+    const body = req.body;
+    const insertQuery = "INSERT INTO categories (name) VALUES (?)";
+    await connection.query(insertQuery, [body.name]);
+
+    res.redirect("/categories");
+});
+
+app.post("/categories/delete/:id", async function (req: Request, res: Response) {
+    const id = req.params.id;
+    const sqlDelete = "DELETE FROM categories WHERE id = ?";
+    await connection.query(sqlDelete, [id]);
+
+    res.redirect("/categories");
+});
+
+//Cadastro
+app.get('/users/add', function(req: Request, res: Response){
+    return res.render('form');
+});
+
+app.post('/users', async function (req: Request, res: Response) {
+    const body = req.body;
+    const insertQuery = 'INSERT INTO users (name, email, password, role, active) VALUES (?,?,?,?,?)';
+    console.log(body);
+    let active = false;
+
+    if(body.active === 'on') {
+        active = true;
+    }
+
+    await connection.query(insertQuery, [body.name, body.email, body.password, body.role, active]);
+
+    res.redirect('/users');
+});
+
+app.get('/users', async function(req: Request, res: Response){
+    const [rows] = await connection.query("SELECT * FROM users");
+    return res.render('categories/listUser', {
+        users: rows
+    });
+});
+
+app.post('users/delete:id', async function(req: Request, res: Response){
+    const id = req.params.id;
+    const sqlDelete = "DELETE FROM users WHERE id = ?";
+    await connection.query(sqlDelete, [id]);
+
+    res.redirect("/users");
+});
+
+app.listen('3000', () => console.log("Server is listening on port 3000: http://localhost:3000/"));
