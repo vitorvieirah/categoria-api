@@ -28,7 +28,7 @@ app.get('/categories', async function (req: Request, res: Response) {
 });
 
 app.get("/categories/form", async function (req: Request, res: Response) {
-    return res.render("categories/form");
+    return res.render("categories/formCategories");
 });
 
 app.post("/categories/save", async function(req: Request, res: Response) {
@@ -47,12 +47,12 @@ app.post("/categories/delete/:id", async function (req: Request, res: Response) 
     res.redirect("/categories");
 });
 
-//Cadastro
+//Usuario
 app.get('/users/add', function(req: Request, res: Response){
-    return res.render('form');
+    return res.render('categories/formUser');
 });
 
-app.post('/users', async function (req: Request, res: Response) {
+app.post('/users', async function (req: Request, res: Response) {    
     const body = req.body;
     const insertQuery = 'INSERT INTO users (name, email, password, role, active) VALUES (?,?,?,?,?)';
     console.log(body);
@@ -74,12 +74,39 @@ app.get('/users', async function(req: Request, res: Response){
     });
 });
 
-app.post('users/delete:id', async function(req: Request, res: Response){
+app.post('/users/delete/:id', async function(req: Request, res: Response){
     const id = req.params.id;
     const sqlDelete = "DELETE FROM users WHERE id = ?";
     await connection.query(sqlDelete, [id]);
 
     res.redirect("/users");
 });
+
+app.get('/login', function name(req: Request, res: Response) {
+    return res.render('categories/login');
+})
+
+app.post('/login', async function (req: Request, res: Response) {
+    const body = req.body;
+    const query = 'SELECT * FROM users WHERE email = ? AND password = ?';
+    
+    try {
+        const [rows] = await connection.query<any[]>(query, [body.email, body.password]);
+
+        if (rows.length === 0) {
+            return res.render('categories/login', { error: 'Usuário ou senha inválidos!' });
+        }
+
+        res.redirect('/users');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Erro interno do servidor');
+    }
+});
+
+app.get('/', function (req: Request, res: Response){
+    return res.render('categories/initialPage');
+});
+
 
 app.listen('3000', () => console.log("Server is listening on port 3000: http://localhost:3000/"));
