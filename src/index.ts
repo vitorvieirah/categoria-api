@@ -3,7 +3,6 @@ import mysql from "mysql2/promise";
 
 const app = express();
 
-// Configura EJS como a engine de renderização de templates
 app.set('view engine', 'ejs');
 app.set('views', `${__dirname}/views`);
 
@@ -15,20 +14,20 @@ const connection = mysql.createPool({
     database: "unicesumar"
 });
 
-// Middleware para permitir dados no formato JSON
 app.use(express.json());
-// Middleware para permitir dados no formato URLENCODED
 app.use(express.urlencoded({ extended: true }));
+
+//Categorias
 
 app.get('/categories', async function (req: Request, res: Response) {
     const [rows] = await connection.query("SELECT * FROM categories");
-    return res.render('categories/index', {
+    return res.render('system/index', {
         categories: rows
     });
 });
 
 app.get("/categories/form", async function (req: Request, res: Response) {
-    return res.render("categories/formCategories");
+    return res.render("system/formCategories");
 });
 
 app.post("/categories/save", async function(req: Request, res: Response) {
@@ -47,9 +46,11 @@ app.post("/categories/delete/:id", async function (req: Request, res: Response) 
     res.redirect("/categories");
 });
 
+
 //Usuario
+
 app.get('/users/add', function(req: Request, res: Response){
-    return res.render('categories/formUser');
+    return res.render('system/formUser');
 });
 
 app.post('/users', async function (req: Request, res: Response) {    
@@ -69,7 +70,7 @@ app.post('/users', async function (req: Request, res: Response) {
 
 app.get('/users', async function(req: Request, res: Response){
     const [rows] = await connection.query("SELECT * FROM users");
-    return res.render('categories/listUser', {
+    return res.render('system/listUser', {
         users: rows
     });
 });
@@ -82,8 +83,11 @@ app.post('/users/delete/:id', async function(req: Request, res: Response){
     res.redirect("/users");
 });
 
+
+//Login
+
 app.get('/login', function name(req: Request, res: Response) {
-    return res.render('categories/login');
+    return res.render('system/login');
 })
 
 app.post('/login', async function (req: Request, res: Response) {
@@ -94,7 +98,7 @@ app.post('/login', async function (req: Request, res: Response) {
         const [rows] = await connection.query<any[]>(query, [body.email, body.password]);
 
         if (rows.length === 0) {
-            return res.render('categories/login', { error: 'Usuário ou senha inválidos!' });
+            return res.render('system/login', { error: 'Usuário ou senha inválidos!' });
         }
 
         res.redirect('/users');
@@ -105,7 +109,7 @@ app.post('/login', async function (req: Request, res: Response) {
 });
 
 app.get('/', function (req: Request, res: Response){
-    return res.render('categories/initialPage');
+    return res.render('system/initialPage');
 });
 
 
